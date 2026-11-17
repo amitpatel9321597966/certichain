@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased font-sans bg-slate-50 text-slate-900;
+  }
+}
+
+/* Custom font utilities */
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-script {
+  font-family: 'Great Vibes', cursive;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Guilloche pattern simulation for certificate borders */
+.guilloche-border {
+  background-image: repeating-linear-gradient(45deg, #ca8a04 0, #ca8a04 2px, transparent 0, transparent 8px),
+                    repeating-linear-gradient(-45deg, #d97706 0, #d97706 2px, transparent 0, transparent 8px);
+}
+
+.certificate-gold-gradient {
+  background: linear-gradient(135deg, #fef08a 0%, #ca8a04 50%, #854d0e 100%);
+}
+
+.certificate-silver-gradient {
+  background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #475569 100%);
+}
+
+.hologram-effect {
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(59,130,246,0.2) 25%, rgba(236,72,153,0.2) 50%, rgba(16,185,129,0.2) 75%, rgba(255,255,255,0.4) 100%);
+}
+
+/* Print styles for authentic full-page certificate output */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-certificate, #printable-certificate * {
+    visibility: visible;
+  }
+  #printable-certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+}
+
+/* Subtle glow animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.6);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
