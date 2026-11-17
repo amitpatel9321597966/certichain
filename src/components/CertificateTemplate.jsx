@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import { Download, Printer, CheckCircle } from 'lucide-react';
+import { Download, Printer, CheckCircle, MoveHorizontal } from 'lucide-react';
 import { exportCertificatePDF, triggerPrint } from '../utils/pdfExport';
 import { truncateHash } from '../utils/crypto';
 
@@ -10,7 +10,6 @@ export default function CertificateTemplate({ certificate }) {
 
   useEffect(() => {
     if (certificate?.id) {
-      // Dynamic QR code with direct verification link
       const verifyUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(certificate.id)}`;
       QRCode.toDataURL(verifyUrl, {
         width: 120,
@@ -40,24 +39,24 @@ export default function CertificateTemplate({ certificate }) {
   const isRevoked = certificate.status === 'REVOKED';
 
   return (
-    <div className="flex flex-col items-center w-full my-6">
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between w-full max-w-[900px] mb-4">
+    <div className="flex flex-col items-center w-full my-4 sm:my-6">
+      {/* Top Action Buttons (Responsive Layout) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full max-w-[900px] mb-3">
         <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block flex-shrink-0"></span>
           <span>Official University Degree Format (Print & PDF Ready)</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={triggerPrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 shadow-xs transition"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 shadow-xs transition"
           >
             <Printer className="w-3.5 h-3.5" /> Print
           </button>
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-semibold shadow-xs transition disabled:opacity-50"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-semibold shadow-xs transition disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
             {downloading ? 'Downloading...' : 'Download PDF (A4)'}
@@ -65,11 +64,17 @@ export default function CertificateTemplate({ certificate }) {
         </div>
       </div>
 
-      {/* Realistic University Certificate Layout */}
-      <div className="w-full overflow-x-auto flex justify-center p-4 bg-slate-100 rounded-xl border border-slate-200">
+      {/* Mobile Swipe Hint */}
+      <div className="sm:hidden w-full text-center mb-2 flex items-center justify-center gap-1 text-[11px] text-slate-500 bg-slate-100 py-1.5 rounded-lg border border-slate-200">
+        <MoveHorizontal className="w-3.5 h-3.5 text-blue-600" />
+        <span>Swipe horizontally to view full certificate</span>
+      </div>
+
+      {/* Certificate Frame with Smooth Horizontal Scroll on Mobile */}
+      <div className="w-full overflow-x-auto flex justify-start sm:justify-center p-2 sm:p-4 bg-slate-100 rounded-2xl border border-slate-200 touch-pan-x">
         <div
           id="university-certificate-target"
-          className="relative w-[900px] h-[640px] bg-[#fffefb] text-slate-900 p-8 flex flex-col justify-between shadow-lg select-none border-[10px] border-[#1e293b]"
+          className="relative w-[900px] h-[640px] bg-[#fffefb] text-slate-900 p-8 flex flex-col justify-between shadow-lg select-none border-[10px] border-[#1e293b] flex-shrink-0"
           style={{ width: '900px', height: '640px' }}
         >
           {/* Inner Golden Border */}
@@ -85,7 +90,6 @@ export default function CertificateTemplate({ certificate }) {
 
           {/* Header */}
           <div className="text-center relative z-10 pt-2">
-            {/* University Crest */}
             <div className="w-12 h-12 mx-auto rounded-full border-2 border-[#b45309] flex items-center justify-center bg-[#1e293b] text-amber-400 mb-2 shadow-sm">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -110,7 +114,6 @@ export default function CertificateTemplate({ certificate }) {
               This is to certify that
             </p>
 
-            {/* Student Name */}
             <h2 className="font-serif text-3xl font-bold text-[#0f172a] tracking-wide border-b border-[#b45309]/30 pb-1 inline-block px-10">
               {certificate.recipientName}
             </h2>
@@ -123,7 +126,6 @@ export default function CertificateTemplate({ certificate }) {
               having fulfilled all requirements and passed the prescribed examinations has been admitted to the degree of
             </p>
 
-            {/* Program Name */}
             <div className="pt-1">
               <span className="font-serif text-lg font-bold text-[#1e293b] bg-amber-50/60 px-5 py-1 rounded border border-[#b45309]/30 inline-block">
                 {certificate.courseName}
@@ -139,7 +141,6 @@ export default function CertificateTemplate({ certificate }) {
 
           {/* Footer: Signatures, Seal, & QR Code */}
           <div className="relative z-10 pt-2 border-t border-[#b45309]/30 flex items-end justify-between px-6 pb-2">
-            {/* Signature 1 */}
             <div className="text-center w-40">
               <div className="font-serif italic text-lg text-slate-800 h-8 flex items-center justify-center font-medium">
                 Prateek Saxena
@@ -150,7 +151,6 @@ export default function CertificateTemplate({ certificate }) {
               </div>
             </div>
 
-            {/* University Embossed Stamp / Seal */}
             <div className="flex flex-col items-center">
               <div className="w-20 h-20 rounded-full border-2 border-dashed border-[#b45309] flex flex-col items-center justify-center p-1 bg-amber-50 text-center">
                 <div className="w-16 h-16 rounded-full border border-[#b45309] flex flex-col items-center justify-center text-[#92400e]">
@@ -161,7 +161,6 @@ export default function CertificateTemplate({ certificate }) {
               </div>
             </div>
 
-            {/* Verification QR Code */}
             <div className="flex items-center gap-2">
               <div className="text-right">
                 <p className="text-[9px] font-bold text-slate-800 uppercase">Scan to Verify</p>

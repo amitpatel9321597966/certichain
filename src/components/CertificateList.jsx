@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Search, Eye, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { blockchainService } from '../services/blockchain';
 import CertificateTemplate from './CertificateTemplate';
 
@@ -19,15 +19,15 @@ export default function CertificateList({ onSelectVerify }) {
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6 px-1 sm:px-0">
+      {/* Title & Search Header */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
             Registered Academic Certificates
           </h1>
           <p className="text-xs text-slate-600 mt-0.5">
-            Database of all degrees permanently anchored on the blockchain.
+            Database of degrees permanently anchored on the blockchain.
           </p>
         </div>
 
@@ -37,15 +37,65 @@ export default function CertificateList({ onSelectVerify }) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, roll no, or ID..."
-            className="w-full px-3 py-1.5 pl-8 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-blue-700"
+            placeholder="Search by student, ID..."
+            className="w-full px-3 py-2 pl-8 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-700"
           />
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3" />
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+      {/* MOBILE VIEW (Card Layout for screens < 640px) */}
+      <div className="sm:hidden space-y-3">
+        {filtered.length === 0 ? (
+          <div className="p-6 bg-white border border-slate-200 rounded-2xl text-center text-xs text-slate-400">
+            No matching records found.
+          </div>
+        ) : (
+          filtered.map((cert) => (
+            <div key={cert.id} className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-bold text-blue-700">{cert.id}</span>
+                {cert.status === 'VALID' ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Valid
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-800 text-[10px] font-bold border border-red-200">
+                    <AlertTriangle className="w-3 h-3 text-red-600" /> Revoked
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm">{cert.recipientName}</h4>
+                <p className="text-xs text-slate-600 font-mono">Roll No: {cert.studentId}</p>
+                <p className="text-xs text-slate-700 mt-1">{cert.courseName}</p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-slate-400">{cert.issueDate}</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedCert(cert)}
+                    className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-semibold text-xs transition"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => onSelectVerify(cert.id)}
+                    className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold text-xs transition border border-blue-200"
+                  >
+                    Verify
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* DESKTOP VIEW (Table for screens >= 640px) */}
+      <div className="hidden sm:block bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase tracking-wider font-mono">
@@ -117,15 +167,15 @@ export default function CertificateList({ onSelectVerify }) {
 
       {/* Modal to view degree */}
       {selectedCert && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl p-6 shadow-xl my-8 space-y-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 shadow-xl my-4 sm:my-8 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="text-sm font-bold text-slate-900">
-                Degree Certificate: {selectedCert.recipientName} ({selectedCert.id})
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate pr-2">
+                {selectedCert.recipientName} ({selectedCert.id})
               </h3>
               <button
                 onClick={() => setSelectedCert(null)}
-                className="text-xs font-bold text-slate-500 hover:text-slate-800 px-2 py-1 bg-slate-100 rounded"
+                className="text-xs font-bold text-slate-600 hover:text-slate-900 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg flex-shrink-0"
               >
                 ✕ Close
               </button>

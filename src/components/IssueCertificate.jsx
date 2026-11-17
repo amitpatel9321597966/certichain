@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Award, CheckCircle2 } from 'lucide-react';
 import { blockchainService } from '../services/blockchain';
 import CertificateTemplate from './CertificateTemplate';
 
@@ -43,7 +43,7 @@ export default function IssueCertificate({ onCertificateIssued }) {
     setIssuedCert(null);
 
     try {
-      await new Promise(r => setTimeout(r, 600)); // Small realistic processing delay
+      await new Promise(r => setTimeout(r, 600));
       const cert = await blockchainService.issueCertificate(formData);
       setIssuedCert(cert);
       if (onCertificateIssued) {
@@ -57,32 +57,32 @@ export default function IssueCertificate({ onCertificateIssued }) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6">
+    <div className="w-full max-w-3xl mx-auto space-y-4 sm:space-y-6 px-1 sm:px-0">
       {/* Title */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+      <div className="text-center space-y-1.5 sm:space-y-2">
+        <h1 className="text-xl sm:text-3xl font-bold text-slate-900">
           Issue New Academic Certificate
         </h1>
-        <p className="text-sm text-slate-600 max-w-lg mx-auto">
+        <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto">
           Authorized university registrar portal to record graduate degrees onto the blockchain.
         </p>
       </div>
 
       {/* Issuance Form */}
-      <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-5">
+      <div className="p-4 sm:p-6 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <span className="text-sm font-bold text-slate-800">Student & Degree Information</span>
+          <span className="text-xs sm:text-sm font-bold text-slate-800">Student & Degree Information</span>
           <button
             type="button"
             onClick={handleFillSample}
             className="text-xs text-blue-700 hover:text-blue-800 font-semibold underline"
           >
-            Fill Sample Details
+            Auto-Fill Sample
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="text-xs font-semibold text-slate-700 block mb-1">
                 Student Full Name <span className="text-red-500">*</span>
@@ -128,7 +128,7 @@ export default function IssueCertificate({ onCertificateIssued }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <label className="text-xs font-semibold text-slate-700 block mb-1">
                 Division / Grade
@@ -183,10 +183,10 @@ export default function IssueCertificate({ onCertificateIssued }) {
 
       {/* Success Banner & Preview */}
       {issuedCert && (
-        <div className="p-5 bg-emerald-50 border border-emerald-300 rounded-2xl space-y-4 animate-fadeIn">
+        <div className="p-4 sm:p-5 bg-emerald-50 border border-emerald-300 rounded-2xl space-y-3 sm:space-y-4 animate-fadeIn">
           <div className="flex items-center gap-2 text-emerald-900">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-            <h3 className="text-sm font-bold">
+            <h3 className="text-xs sm:text-sm font-bold">
               Certificate Successfully Issued & Sealed on Blockchain!
             </h3>
           </div>

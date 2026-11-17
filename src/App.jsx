@@ -6,14 +6,13 @@ import CertificateList from './components/CertificateList';
 import { blockchainService } from './services/blockchain';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('verify'); // 'verify' | 'issue' | 'list'
+  const [activeTab, setActiveTab] = useState('verify');
   const [targetVerifyId, setTargetVerifyId] = useState('');
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     blockchainService.init().then(() => setInitialized(true));
 
-    // Handle URL parameter ?id=CERT-2026-001 (e.g. from QR code scan)
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id') || params.get('verifyId');
     if (id) {
@@ -38,12 +37,12 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
-      {/* Simple Clean Header */}
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col selection:bg-blue-600 selection:text-white">
+      {/* Responsive Navbar */}
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {activeTab === 'verify' && (
           <VerifyCertificate 
             initialId={targetVerifyId} 
@@ -62,13 +61,13 @@ export default function App() {
         )}
       </main>
 
-      {/* Clean University Project Footer */}
-      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="font-medium text-slate-700">
-            Blockchain-Based Certificate Verification System
+      {/* Responsive Footer */}
+      <footer className="border-t border-slate-200 bg-white py-4 sm:py-6 text-center text-xs text-slate-500">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2">
+          <p className="font-medium text-slate-700 text-xs">
+            CertiChain — Blockchain Certificate Verification System
           </p>
-          <p className="text-slate-400 text-[11px]">
+          <p className="text-slate-400 text-[10px] sm:text-[11px]">
             SHA-256 Cryptographic Hashing • Decentralized Immutable Ledger
           </p>
         </div>
