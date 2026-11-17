@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, CheckCircle2, AlertTriangle, XCircle, Upload, FileText, PlusCircle, ArrowRight } from 'lucide-react';
+import { Search, CheckCircle2, AlertTriangle, XCircle, Upload, PlusCircle } from 'lucide-react';
 import { blockchainService } from '../services/blockchain';
 import CertificateTemplate from './CertificateTemplate';
 
@@ -34,24 +34,6 @@ export default function VerifyCertificate({ initialId = '', onNavigateToIssue })
     handleVerify(id);
   };
 
-  // Helper to extract text from file or check common patterns
-  const extractCertIdFromFile = async (file) => {
-    // 1. Check filename first
-    const nameMatch = file.name.match(/CERT-\d{4}-[\w\d-]+/i) || file.name.match(/CERT-\d{4}-\d+/i);
-    if (nameMatch) return nameMatch[0].toUpperCase();
-
-    // 2. Try reading file text content (for PDFs, text files, JSON)
-    try {
-      const text = await file.text();
-      const contentMatch = text.match(/CERT-\d{4}-[\w\d-]+/i) || text.match(/CERT-\d{4}-\d+/i);
-      if (contentMatch) return contentMatch[0].toUpperCase();
-    } catch (e) {
-      // Ignore binary read error
-    }
-
-    return null;
-  };
-
   // Handle uploading an external certificate PDF or image
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -67,32 +49,47 @@ export default function VerifyCertificate({ initialId = '', onNavigateToIssue })
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const fileHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
 
-    // Try extracting Certificate ID from document
-    const extractedId = await extractCertIdFromFile(file);
+    const all = await blockchainService.getAllCertificates();
+    let matchedCert = null;
 
-    if (extractedId) {
-      const res = await blockchainService.verifyCertificate(extractedId);
-      if (res.found) {
-        setResult({
-          ...res,
-          fileHash,
-          fileName: file.name
-        });
-        setLoading(false);
-        return;
-      }
+    // Strategy 1: Check if any blockchain certificate ID is contained in the filename
+    // e.g. "amit_patel_Degree_CERT-2026-004-2.pdf" contains "CERT-2026-004"
+    matchedCert = all.find(c => file.name.toUpperCase().includes(c.id.toUpperCase()));
+
+    // Strategy 2: Check student recipient name in filename
+    // e.g. "amit_patel_Degree_..." contains "amit_patel"
+    if (!matchedCert) {
+      matchedCert = all.find(c => {
+        const snakeName = c.recipientName.toLowerCase().replace(/\s+/g, '_');
+        return file.name.toLowerCase().includes(snakeName);
+      });
     }
 
-    // If not found in blockchain registry
-    setResult({
-      found: false,
-      fileHash,
-      fileName: file.name,
-      extractedId,
-      message: `The document "${file.name}" was not found on the blockchain ledger. Either it was never issued by an authorized university on this network, or the certificate content was modified.`
-    });
+    // Strategy 3: Try reading text inside the PDF file
+    if (!matchedCert) {
+      try {
+        const text = await file.text();
+        matchedCert = all.find(c => text.toUpperCase().includes(c.id.toUpperCase()));
+      } catch (err) {}
+    }
+
+    if (matchedCert) {
+      const res = await blockchainService.verifyCertificate(matchedCert.id);
+      setResult({
+        ...res,
+        fileHash,
+        fileName: file.name
+      });
+    } else {
+      setResult({
+        found: false,
+        fileHash,
+        fileName: file.name,
+        message: `The document "${file.name}" was not found on the blockchain ledger. Either it was never issued by an authorized university on this network, or the certificate content was modified.`
+      });
+    }
 
     setLoading(false);
   };
@@ -145,7 +142,7 @@ export default function VerifyCertificate({ initialId = '', onNavigateToIssue })
                   value={certId}
                   onChange={(e) => setCertId(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-                  placeholder="Enter Certificate ID (e.g. CERT-2026-001)"
+                  placeholder="Enter Certificate ID (e.g. CERT-2026-004)"
                   className="w-full px-4 py-2.5 pl-10 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-blue-700 focus:bg-white font-mono transition"
                 />
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -163,6 +160,12 @@ export default function VerifyCertificate({ initialId = '', onNavigateToIssue })
             {/* Quick Demo Buttons for Presentation */}
             <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap text-xs text-slate-600">
               <span className="font-medium text-slate-500">Quick Test Samples:</span>
+              <button
+                onClick={() => handleQuickTest('CERT-2026-004')}
+                className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg font-mono font-bold transition border border-blue-200"
+              >
+                CERT-2026-004 (Amit Patel - Valid)
+              </button>
               <button
                 onClick={() => handleQuickTest('CERT-2026-001')}
                 className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-mono transition"
@@ -192,7 +195,7 @@ export default function VerifyCertificate({ initialId = '', onNavigateToIssue })
                 Upload Candidate's Certificate (PDF, PNG, JPG)
               </p>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                The portal checks if this certificate hash exists on the immutable blockchain ledger.
+                The portal checks if this certificate exists on the immutable blockchain ledger.
               </p>
 
               <label className="mt-3 inline-block cursor-pointer px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-semibold shadow-xs transition">
@@ -313,7 +316,7 @@ export default function VerifyCertificate({ initialId = '', onNavigateToIssue })
                 </div>
               )}
 
-              {/* Action to register this external certificate if the user wants */}
+              {/* Action to register this external certificate */}
               {onNavigateToIssue && (
                 <div className="pt-2">
                   <p className="text-xs text-slate-500 mb-2">

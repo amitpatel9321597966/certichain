@@ -1,9 +1,25 @@
 import { sha256, computeCertificateHash, generateTxHash } from '../utils/crypto';
 
-const STORAGE_KEY = 'simple_blockchain_certificates_v2';
+const STORAGE_KEY = 'simple_blockchain_certificates_v3';
 
-// 3 realistic sample certificates for presentation
+// Realistic sample certificates pre-loaded on blockchain
 const DEFAULT_CERTIFICATES = [
+  {
+    id: 'CERT-2026-004',
+    recipientName: 'Amit Patel',
+    studentId: '2022CS088',
+    courseName: 'Bachelor of Technology in Computer Science & Engineering',
+    grade: 'First Class with Distinction (9.2 CGPA)',
+    issueDate: '2026-06-15',
+    issuerName: 'Delhi Technological University',
+    signatoryName: 'Prof. Prateek Saxena',
+    signatoryTitle: 'Controller of Examinations',
+    status: 'VALID',
+    revocationReason: '',
+    blockNumber: 104,
+    txHash: '0x88f12a7bf309ef3214da8892bc510aa27f88410b01c38e653896504aef72c810',
+    timestamp: 1781520000000,
+  },
   {
     id: 'CERT-2026-001',
     recipientName: 'Rahul Sharma',
